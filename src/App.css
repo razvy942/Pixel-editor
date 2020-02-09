@@ -1,0 +1,15 @@
+.App {
+  height: 100vh;
+}
+
+.canvas-options {
+  margin-bottom: 30px;
+}
+
+.canvas-options input {
+  margin: 10px;
+}
+
+.canvas-elem {
+  margin-top: 100px;
+}

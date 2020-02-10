@@ -1,12 +1,19 @@
 import Colors from './Colors';
 
 class Draw {
-  constructor(ctx, width, height, pixelSize) {
+  constructor(ctx, width, height, pixelSize, canvasType, isTransparent) {
     this.ctx = ctx;
     this.width = width;
     this.height = height;
     this.pixelSize = pixelSize;
     this.color = Colors.RED;
+    this.canvasType = canvasType;
+    this.isTransparent = isTransparent;
+
+    // keep track of all changes
+    this.historyStack = [];
+
+    this.clear();
   }
 
   setHeight = height => {
@@ -39,7 +46,9 @@ class Draw {
     this.ctx.fillRect(posX, posY, w, h);
     this.ctx.translate(-0.5, -0.5);
 
-    return { w: w, h: h, posX: posX, posY: posY };
+    const rect = { w: w, h: h, posX: posX, posY: posY };
+    this.historyStack.push(rect);
+    return rect;
   };
 
   createGrid = () => {
@@ -95,6 +104,9 @@ class Draw {
 
   clear = () => {
     this.ctx.clearRect(0, 0, this.width, this.height);
+    if (this.canvasType === 'background') {
+      this.fillBackground();
+    }
   };
 
   colorGridOnHover = (e, offsetX, offsetY) => {
@@ -105,7 +117,7 @@ class Draw {
 
     const gridPosX = Math.floor(xPos / this.pixelSize) * this.pixelSize; // Get start position inside grid
     const gridPosY = Math.floor(yPos / this.pixelSize) * this.pixelSize; // Get start position inside grid
-
+    this.fillBackground();
     this.createRect(
       this.pixelSize,
       this.pixelSize,
@@ -114,6 +126,19 @@ class Draw {
       gridPosY,
       this.ctx
     );
+  };
+
+  fillBackground = () => {
+    if (this.isTransparent) {
+      this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    } else {
+      this.ctx.fillStyle = 'white';
+    }
+    this.ctx.fillRect(0, 0, this.width, this.height);
+  };
+
+  reconstruct = () => {
+    // Recreate the entire canvas as it was when state changes
   };
 }
 

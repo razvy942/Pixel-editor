@@ -72,12 +72,22 @@ function App() {
         clearCanvas={canvasShouldBeCleared}
       /> */}
 
-      <Canvas
-        width={width}
-        height={height}
-        pixelSize={pixelSize}
-        clearCanvas={canvasShouldBeCleared}
-      />
+      <div className="canvas-container">
+        <Canvas
+          width={width}
+          height={height}
+          pixelSize={pixelSize}
+          clearCanvas={canvasShouldBeCleared}
+          isTransparent={false}
+        />
+        <Canvas
+          width={width}
+          height={height}
+          pixelSize={pixelSize}
+          clearCanvas={canvasShouldBeCleared}
+          isTransparent={true}
+        />
+      </div>
     </div>
   );
 }

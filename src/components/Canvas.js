@@ -3,13 +3,14 @@ import PropTypes from 'prop-types';
 
 import Draw from '../util/canvasDrawing';
 import Colors from '../util/Colors';
-import './Canvas.css';
+import classes from './Canvas.module.css';
 
-// TODO: create grid and give each square a size defined in props for canvas
-
+// TODO: Make width global so all layers get resized
 class Canvas extends Component {
   state = {
-    isMouseDown: false
+    isMouseDown: false,
+    windowWidth: window.innerWidth,
+    isTransparent: this.props.isTransparent
   };
 
   canvasRef = React.createRef();
@@ -18,6 +19,7 @@ class Canvas extends Component {
 
   mainCanvas;
   backgroundCanvas;
+  resizeTimeout;
 
   initializeCanvas = () => {
     // Main layer, pixels are drawn
@@ -26,7 +28,8 @@ class Canvas extends Component {
       c.getContext('2d'),
       this.props.width,
       this.props.height,
-      this.props.pixelSize
+      this.props.pixelSize,
+      this.state.isTransparent
     );
     // Background layer, used for the mouse drop shadow
     c = this.canvasRefBackground.current;
@@ -34,8 +37,17 @@ class Canvas extends Component {
       c.getContext('2d'),
       this.props.width,
       this.props.height,
-      this.props.pixelSize
+      this.props.pixelSize,
+      'background'
     );
+
+    if (!this.state.isTransparent) {
+      this.mainCanvas.ctx.font = '20px Georgia';
+      this.mainCanvas.ctx.fillText('Hello World!', 10, 50);
+    } else {
+      this.mainCanvas.ctx.font = '20px Georgia';
+      this.mainCanvas.ctx.fillText('Hello World! from2', 30, 50);
+    }
   };
 
   moveRectOnTopLayer = e => {
@@ -57,17 +69,36 @@ class Canvas extends Component {
     this.mainCanvas.setColor(e.target.value);
   };
 
+  handleResize = () => {
+    console.log(window.innerWidth);
+    this.setState({
+      windowWidth: window.innerWidth
+    });
+  };
+
   componentDidMount() {
+    console.log(window.innerWidth);
+
+    // Canvas is an absolute positioned element, centering needs to be done in javascript
+    window.onresize = () => {
+      clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = setTimeout(this.handleResize, 100);
+    };
+
     this.initializeCanvas();
     this.mainCanvas.createRect(32, 32, Colors.RED, 0, 0);
   }
 
-  shouldComponentUpdate(nextProps) {
-    return this.props !== nextProps;
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.props !== nextProps) this.mainCanvas.clear();
+
+    return (
+      this.props !== nextProps ||
+      this.state.windowWidth !== nextState.windowWidth
+    );
   }
 
   componentDidUpdate() {
-    this.mainCanvas.clear();
     this.mainCanvas.setAllParams(
       this.props.height,
       this.props.width,
@@ -78,9 +109,14 @@ class Canvas extends Component {
       this.props.width,
       this.props.pixelSize
     );
+    this.backgroundCanvas.clear();
   }
 
   render() {
+    const centerPos = this.state.windowWidth / 2 - this.props.width / 2 + 'px';
+    const isVisibile = true;
+    const centerPosStyle = { left: centerPos };
+    const showBackground = { display: isVisibile };
     return (
       <div>
         <button value={Colors.RED} onClick={this.changeColor}>
@@ -89,26 +125,25 @@ class Canvas extends Component {
         <button value={Colors.BLUE} onClick={this.changeColor}>
           BLUE
         </button>
-        <canvas
-          id="grid-layer"
-          className="canvas-grid-layer"
-          ref={this.canvasGridLayer}
-          width={this.props.width}
-          height={this.props.height}
-        ></canvas>
+
         <canvas
           id="background-layer"
-          className="canvas-bottom-layer"
+          style={{ ...centerPosStyle, ...showBackground }}
+          className={classes.canvasBottomLayer}
           ref={this.canvasRefBackground}
           width={this.props.width}
           height={this.props.height}
         ></canvas>
         <canvas
+          id="pixelCanvas"
+          style={centerPosStyle}
+          className={classes.canvasTopLayer}
           onMouseDown={e => {
             this.setState({ isMouseDown: true });
             this.moveRectOnTopLayer(e);
           }}
           onMouseUp={() => this.setState({ isMouseDown: false })}
+          onMouseEnter={() => this.setState({ isMouseDown: false })}
           onMouseMove={e => {
             if (this.state.isMouseDown) {
               this.moveRectOnTopLayer(e);
@@ -116,8 +151,6 @@ class Canvas extends Component {
             this.colorBackgroundGrid(e);
           }}
           onMouseLeave={() => this.backgroundCanvas.clear()}
-          className="canvas-top-layer"
-          id="pixelCanvas"
           ref={this.canvasRef}
           width={this.props.width}
           height={this.props.height}

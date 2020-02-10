@@ -1,9 +1,6 @@
 .App {
   height: 100vh;
-}
-
-.canvas-options {
-  margin-bottom: 30px;
+  overflow-y: hidden;
 }
 
 .canvas-options input {
@@ -12,4 +9,14 @@
 
 .canvas-elem {
   margin-top: 100px;
+}
+
+.canvas-container {
+  background: #2a2a2a;
+  height: 100%;
+  position: relative;
+}
+
+.layer {
+  display: flex;
 }

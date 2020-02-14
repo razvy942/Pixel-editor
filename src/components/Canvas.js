@@ -10,7 +10,9 @@ class Canvas extends Component {
   state = {
     isMouseDown: false,
     windowWidth: window.innerWidth,
-    isTransparent: this.props.isTransparent
+    isTransparent: this.props.isTransparent,
+    layerNumber: this.props.layerNumber,
+    activeLayer: this.props.activeLayer
   };
 
   canvasRef = React.createRef();
@@ -43,10 +45,12 @@ class Canvas extends Component {
 
     if (!this.state.isTransparent) {
       this.mainCanvas.ctx.font = '20px Georgia';
-      this.mainCanvas.ctx.fillText('Hello World!', 10, 50);
+      this.mainCanvas.ctx.fillText('Hello World! from bottom layer', 10, 50);
+      this.mainCanvas.setColor(Colors.RED);
     } else {
       this.mainCanvas.ctx.font = '20px Georgia';
-      this.mainCanvas.ctx.fillText('Hello World! from2', 30, 50);
+      this.mainCanvas.ctx.fillText('Hello World! from top layer', 80, 100);
+      this.mainCanvas.setColor(Colors.BLUE);
     }
   };
 
@@ -80,10 +84,11 @@ class Canvas extends Component {
     console.log(window.innerWidth);
 
     // Canvas is an absolute positioned element, centering needs to be done in javascript
-    window.onresize = () => {
-      clearTimeout(this.resizeTimeout);
-      this.resizeTimeout = setTimeout(this.handleResize, 100);
-    };
+    // window.onresize = () => {
+    //   clearTimeout(this.resizeTimeout);
+    //   this.resizeTimeout = setTimeout(this.handleResize, 100);
+    // };
+    window.addEventListener('resize', this.handleResize);
 
     this.initializeCanvas();
     this.mainCanvas.createRect(32, 32, Colors.RED, 0, 0);
@@ -112,11 +117,23 @@ class Canvas extends Component {
     this.backgroundCanvas.clear();
   }
 
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+  }
+
   render() {
     const centerPos = this.state.windowWidth / 2 - this.props.width / 2 + 'px';
     const isVisibile = true;
     const centerPosStyle = { left: centerPos };
     const showBackground = { display: isVisibile };
+
+    let passEventsThrough;
+    if (this.props.activeLayer === this.props.layerNumber) {
+      passEventsThrough = { pointerEvents: 'none' };
+    } else {
+      passEventsThrough = { pointerEvents: 'auto' };
+    }
+
     return (
       <div>
         <button value={Colors.RED} onClick={this.changeColor}>
@@ -136,7 +153,7 @@ class Canvas extends Component {
         ></canvas>
         <canvas
           id="pixelCanvas"
-          style={centerPosStyle}
+          style={{ ...centerPosStyle, ...passEventsThrough }}
           className={classes.canvasTopLayer}
           onMouseDown={e => {
             this.setState({ isMouseDown: true });
@@ -155,6 +172,7 @@ class Canvas extends Component {
           width={this.props.width}
           height={this.props.height}
         ></canvas>
+        <p style={{ color: 'white' }}>Layer #: {this.state.layerNumber}</p>
       </div>
     );
   }

@@ -10,6 +10,8 @@ function App() {
   const [height, setHeight] = useState(600);
   const [pixelSize, setPixelSize] = useState(32);
   const [canvasShouldBeCleared, setCanvasShouldBeCleared] = useState(false);
+  // make top layer default layer
+  const [currentLayer, setCurrentLayer] = useState(2);
 
   const sizeOnChange = e => {
     let currentVal = e.target.value;
@@ -34,6 +36,14 @@ function App() {
     setCanvasShouldBeCleared(!canvasShouldBeCleared);
   };
 
+  const switchLayer = () => {
+    if (currentLayer === 1) {
+      setCurrentLayer(2);
+    } else {
+      setCurrentLayer(1);
+    }
+  };
+
   return (
     <div className="App">
       <div className="canvas-options">
@@ -56,6 +66,8 @@ function App() {
           onChange={sizeOnChange}
         ></input>
         <button onClick={clearCanvas}>Clear Canvas</button>
+        <p>Currently on layer # {currentLayer}</p>
+        <button onClick={switchLayer}>Switch layers</button>
       </div>
 
       {/* <Background
@@ -79,6 +91,8 @@ function App() {
           pixelSize={pixelSize}
           clearCanvas={canvasShouldBeCleared}
           isTransparent={false}
+          layerNumber={1}
+          activeLayer={currentLayer}
         />
         <Canvas
           width={width}
@@ -86,6 +100,8 @@ function App() {
           pixelSize={pixelSize}
           clearCanvas={canvasShouldBeCleared}
           isTransparent={true}
+          layerNumber={2}
+          activeLayer={currentLayer}
         />
       </div>
     </div>

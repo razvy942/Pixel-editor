@@ -130,7 +130,7 @@ class Draw {
 
   fillBackground = () => {
     if (this.isTransparent) {
-      this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     } else {
       this.ctx.fillStyle = 'white';
     }
